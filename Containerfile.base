@@ -1,7 +1,12 @@
-FROM quay.io/fedora/fedora-bootc:rawhide
+# Variabile per la versione di Fedora
+ARG FEDORA_VERSION=43
+FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION}
 
 LABEL maintainer="AndyOS Project"
-LABEL description="AndyOS Base - Fedora bootc (Rawhide), Kernel CachyOS, Niri e DMS"
+LABEL description="AndyOS Base - Fedora bootc, Kernel CachyOS, Niri e DMS"
+
+# Re-declaration dell'ARG all'interno dello stage per l'uso eventuale nelle LABEL/RUN
+ARG FEDORA_VERSION
 
 # 1. Abilitazione repository Copr (Kernel CachyOS, Niri, sched_ext)
 RUN dnf copr enable -y bieszczaders/cachyos && \
