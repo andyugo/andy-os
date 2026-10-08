@@ -1,0 +1,20 @@
+FROM ghcr.io/andyugo/andy-os-base:latest
+
+LABEL maintainer="AndyOS Project"
+LABEL description="AndyOS - Target specifico per Lenovo Yoga 900"
+
+# 1. Installazione sensori di orientamento e utility hardware
+RUN dnf install -y \
+    iio-sensor-proxy \
+    lsusb lshw && \
+    dnf clean all
+
+# 2. Copia dello script di rotazione automatica e della configurazione Niri per Yoga
+COPY scripts/auto-rotate.sh /usr/local/bin/auto-rotate.sh
+COPY config/niri-yoga.kdl /etc/skel/.config/niri/config.kdl
+
+# 3. Permessi di esecuzione allo script
+RUN chmod +x /usr/local/bin/auto-rotate.sh
+
+# 4. Abilitazione servizio sensori
+RUN systemctl enable iio-sensor-proxy.service
