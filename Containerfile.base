@@ -1,1 +1,32 @@
+FROM quay.io/fedora/fedora-bootc:rawhide
 
+LABEL maintainer="AndyOS Project"
+LABEL description="AndyOS Base - Fedora bootc (Rawhide), Kernel CachyOS, Niri e DMS"
+
+# 1. Abilitazione repository Copr (Kernel CachyOS, Niri, sched_ext)
+RUN dnf copr enable -y bieszczaders/cachyos && \
+    dnf copr enable -y yiqiang/niri && \
+    dnf copr enable -y cachyos/scx-scheds
+
+# 2. Installazione pacchetti di sistema, Kernel CachyOS, Niri, QEMU e dipendenze DMS
+RUN dnf install -y \
+    kernel-cachyos kernel-cachyos-devel \
+    niri alacritty git \
+    quickshell matugen pamixer brightnessctl playerctl \
+    quickemu qemu-kvm virt-manager \
+    waydroid \
+    systemd-zram-generator scx-scheds \
+    sof-firmware && \
+    dnf clean all
+
+# 3. Copia delle configurazioni base (ZRAM e Niri)
+COPY config/zram-generator.conf /etc/systemd/zram-generator.conf
+COPY config/99-zram.conf /etc/sysctl.d/99-zram.conf
+COPY config/niri-base.kdl /etc/skel/.config/niri/config.kdl
+
+# 4. Installazione di DankMaterialShell (DMS)
+RUN git clone https://github.com/DankMaterial/DMS.git /usr/share/dms
+
+# 5. Abilitazione servizi di sistema base
+RUN systemctl enable systemd-zram-setup@zram0.service && \
+    systemctl enable waydroid-container.service
